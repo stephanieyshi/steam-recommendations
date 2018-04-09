@@ -44,5 +44,10 @@ def main():
 
 main()
 
-def classify_hours(X, user, k):
+def classify_hours(X, user, k, game_id):
     X = np.array(X)
+    dist = np.sum(np.square(X - user), 2)
+    knn = np.argpartition(dist, k)
+
+    neighbor_hours = X[knn, game_id - 1]
+    return np.sum(neighbor_hours)[0] / len(neighbor_hours)

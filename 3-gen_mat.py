@@ -20,6 +20,7 @@ print(str(num_games))
 
 user_mat = sparse.lil_matrix((num_users, num_games))
 i = 0
+total_entries = 0
 for user, games_dict in users.items():
   games_ar = np.zeros((1, len(games_dict))) 
   hours_ar = np.zeros((1, len(games_dict)))
@@ -28,6 +29,7 @@ for user, games_dict in users.items():
     games_ar[0, j] = games[game]
     hours_ar[0, j] = hours
     j = j + 1
+    total_entries = total_entries + 1
   user_mat[i, games_ar] = hours_ar
   if i % 10000 == 0: 
     print(str(i))
@@ -35,3 +37,6 @@ for user, games_dict in users.items():
 
 user_mat = sparse.csc_matrix(user_mat)
 sparse.save_npz('./data/user_mat.npz', user_mat)
+
+sparsity = total_entries/(num_games*num_users)
+print("Sparsity: " + str(sparsity))

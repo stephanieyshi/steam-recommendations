@@ -35,22 +35,38 @@ print("Done column arrangement")
 
 #Rearrange matrix to be in order of most dense to least dense user rows
 user_sparsity = np.count_nonzero(users_mat, 1)
-ordered_users = np.argsort(user_sparsity)[::-1]
-print("Done user ordering")
-users_mat = users_mat[ordered_users,:]
-print("Done user matrix rearrangement")
+# print(user_sparsity)
+ordered_users = np.argsort(user_sparsity, 0)[::-1]
+# for new_index in ordered_users:
+#   print(new_index)
 
+# print(ordered_users.shape)
+print("Done user ordering")
+# print(users_mat.shape)
+users_mat = np.squeeze(users_mat[ordered_users.flatten(),:])
+print("Done user matrix rearrangement")
+# print(users_mat.shape)
 # Updating user_map
 reveresed_user_map = {}
 for user, index in users_map.items():
+  # print(user)
+  # print(index)
   reveresed_user_map[index] = user
+
+# print(len(reveresed_user_map))
+# print(type(reveresed_user_map))
 
 users_map = {}
 for new_index in range(ordered_users.shape[0]):
   old_index = ordered_users[new_index, 0]
-  users_map[reveresed_user_map[old_index]] = new_index
+  # print(old_index)
+  # print(new_index)
+  user_id = reveresed_user_map[old_index]
+  users_map[user_id] = new_index
 
 print("Done user map update")
+print(len(users_map))
+print(type(users_map))
 
 user_nonzero = np.count_nonzero(users_mat, 1)
 user_remove_rate = math.ceil(n / org_cols)
@@ -99,16 +115,19 @@ print("Done games map update")
 users_mat = np.delete(users_mat, np.array(remove_cols), 1)
 
 #Remove relevant users from the matrix:
-users_mat = users_mat[0:users_mat.shape[0]-1-user_batches*user_remove_rate,]
+users_mat = users_mat[0:users_mat.shape[0]-user_batches*user_remove_rate,]
 
 print("Done updating matrix")
 
 # Some sanity checks
-# new_cols = users_mat.shape[1]
-# print(sparsity)
-# print(len(remove_cols))
-# print(org_cols - new_cols)
-# print(str(users_mat.shape))
+new_cols = users_mat.shape[1]
+print(sparsity)
+print(len(remove_cols))
+print(org_cols - new_cols)
+print(n - users_mat.shape[0])
+print(user_batches*user_remove_rate)
+
+curr_users = users_mat.shape[0]
 
 col_num = users_mat.shape[1]
 problem = False
@@ -122,6 +141,13 @@ else:
 output = sparse.csc_matrix(users_mat)
 sparse.save_npz(directory_path + 'data/dense_user_mat.npz', output)
 
+# Delete old entries in user_map 
+new_size = users_mat.shape[0]
+for user in list(users_map.keys()): 
+  new_index = users_map[user]
+  if new_index >= new_size:
+    del users_map[user]
+
 #update games index map
 pickle_out = open(directory_path + "data/games_dense.p", 'wb')
 pickle.dump(games, pickle_out)
@@ -129,5 +155,5 @@ pickle_out.close()
 
 #update users index map
 pickle_out = open(directory_path + "data/user_map_dense.p", 'wb')
-pickle.dump(users_mat, pickle_out)
+pickle.dump(users_map, pickle_out)
 pickle_out.close()

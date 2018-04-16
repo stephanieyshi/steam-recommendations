@@ -89,7 +89,7 @@ while sparsity < target:
     (user_nonzero.shape[0]-1) - user_remove_rate*(user_batches-1)]
   ceiling_entries_removed = np.sum(ceiling_entries_removed) - user_remove_rate
   ceiling_entries_removed = max(ceiling_entries_removed, 0)
-
+  total = total - ceiling_entries_removed
   sparsity = total/((inverse_sparsity.shape[1] - len(remove_cols)) *
    (n-(user_batches*user_remove_rate)))
   ordered_cols = np.delete(ordered_cols, 0, 1)

@@ -5,15 +5,16 @@ import math
 
 #Parameters
 target = .05  # Gives the target sparsity
+directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/" # Path to git repo on your machine
 
-users_mat = sparse.load_npz('../data/user_mat.npz').todense()
+users_mat = sparse.load_npz(directory_path + 'data/user_mat.npz').todense()
 games = []
-with open('../data/games.p', 'rb') as f: 
+with open(directory_path + 'data/games.p', 'rb') as f: 
   games = pickle.load(f)
   f.close()
 
 users_map = {}
-with open('../data/user_map.p', 'rb') as f: 
+with open(directory_path + 'data/user_map.p', 'rb') as f: 
   users_map = pickle.load(f)
   f.close()
 
@@ -119,14 +120,14 @@ if not problem:
 else:
   print("There's an indexing failure")
 output = sparse.csc_matrix(users_mat)
-sparse.save_npz('dense_user_mat.npz', output)
+sparse.save_npz(directory_path + 'data/dense_user_mat.npz', output)
 
 #update games index map
-pickle_out = open("../data/games_dense.p", 'wb')
+pickle_out = open(directory_path + "data/games_dense.p", 'wb')
 pickle.dump(games, pickle_out)
 pickle_out.close()
 
 #update users index map
-pickle_out = open("../data/user_map_dense.p", 'wb')
+pickle_out = open(directory_path + "data/user_map_dense.p", 'wb')
 pickle.dump(users_mat, pickle_out)
 pickle_out.close()

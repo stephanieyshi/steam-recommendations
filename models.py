@@ -22,7 +22,7 @@ def main():
 
     reader = Reader(line_format='user item rating', sep='\t')
 
-    data = Dataset.load_from_file('/home/brandbest1/Documents/uPenn/2018s/CIS520/project/proj_repo/data/train_users.csv', reader=reader) \
+    data = Dataset.load_from_file('data/train_users.csv', reader=reader) \
                   .build_full_trainset()
 
     algo = SVD()

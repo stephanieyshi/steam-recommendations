@@ -1,2 +1,5 @@
 env/
 .DS_Store
+venv/
+subset*
+data/train_users.csv

@@ -25,4 +25,4 @@ for r, i in enumerate(s):
 #print d
 
 with open('user_games2.json', 'w') as f:
-        json.dump(d, f, separators = (',', ':'))
+    json.dump(d, f, separators = (',', ':'))

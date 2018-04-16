@@ -2,7 +2,7 @@ import pymysql
 import os
 import json
 
-connection = pymysql.connect(host='35.231.155.194', user='eplu', passwd='Acan0fBEEZ7683@', db='steam')
+connection = pymysql.connect(host='35.231.155.194', user='eplu', db='steam')
 
 cur = connection.cursor()
 with open('subset2.txt') as f:

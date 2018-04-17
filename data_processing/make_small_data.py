@@ -7,7 +7,7 @@ import math
 # Parameters
 # Path to git repo on your machine
 directory_path = "/Users/stephanieshi/Documents/Projects/cis520/"
-n = 40  # Number of users
+n = 10  # Number of users
 
 users_map = {}
 with open(directory_path + 'data/train_users.p', 'rb') as f:

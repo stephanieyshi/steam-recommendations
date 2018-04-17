@@ -3,12 +3,28 @@ import numpy as np
 import scipy.sparse as sparse
 import math
 
+<<<<<<< HEAD
 # Parameters
 target = .05  # Gives the target sparsity
 # Path to git repo on your machine
 directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
+=======
+#Parameters
+target = .01  # Gives the target sparsity
+directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/" # Path to git repo on your machine
+>>>>>>> 2dece476767cfd83ff5ac4634e0be4f1f41bf09b
 
-users_mat = sparse.load_npz(directory_path + 'data/user_mat.npz').todense()
+users_mat = sparse.load_npz(directory_path + 'data/user_mat.npz')
+entries = users_mat.data
+
+print("20: " + str(np.percentile(entries, 20)))
+print("40: " + str(np.percentile(entries, 40)))
+print("60: " + str(np.percentile(entries, 60)))
+print("80: " + str(np.percentile(entries, 80)))
+
+users_mat = users_mat.todense()
+print("Max hours: " + str(users_mat.max()))
+
 games = []
 with open(directory_path + 'data/games.p', 'rb') as f:
     games = pickle.load(f)
@@ -70,11 +86,14 @@ print(len(users_map))
 print(type(users_map))
 
 user_nonzero = np.count_nonzero(users_mat, 1)
+# for entry in user_nonzero:
+#   print(entry)
 user_remove_rate = math.ceil(n / org_cols)
 user_batches = 0
 
 print("Beginning sparsity computation")
 
+<<<<<<< HEAD
 while sparsity < target:
     # Remove game with the lowest sparsity
     targ_col = ordered_cols[0, 0]
@@ -96,6 +115,32 @@ while sparsity < target:
                         (n - (user_batches * user_remove_rate)))
     ordered_cols = np.delete(ordered_cols, 0, 1)
     # print(ordered_cols.shape[1])
+=======
+while sparsity < target:  
+  # Remove game with the lowest sparsity
+  targ_col = ordered_cols[0, 0]
+  # print(targ_col)
+  remove_cols.append(targ_col)
+  total = total - inverse_sparsity[0, targ_col]
+  # print(total)
+  # print(type(total))
+
+  # Remove k users with lowest sparsity
+  user_batches = user_batches + 1
+  ceiling_entries_removed = user_nonzero[((user_nonzero.shape[0]-1) - (user_remove_rate*user_batches)):
+    (user_nonzero.shape[0]-1) - user_remove_rate*(user_batches-1)]
+  ceiling_entries_removed = np.sum(ceiling_entries_removed) - user_remove_rate
+  ceiling_entries_removed = max(ceiling_entries_removed, 0)
+  total = total - ceiling_entries_removed
+  sparsity = total/((inverse_sparsity.shape[1] - len(remove_cols)) *
+   (n-(user_batches*user_remove_rate)))
+  # print(sparsity)
+  # print(user_batches)
+  # print(user_remove_rate)
+  # print(n-(user_batches*user_remove_rate))
+  ordered_cols = np.delete(ordered_cols, 0, 1)
+  # print(ordered_cols.shape[1])
+>>>>>>> 2dece476767cfd83ff5ac4634e0be4f1f41bf09b
 
 print("Done sparsity computation")
 
@@ -141,7 +186,7 @@ if not problem:
 else:
     print("There's an indexing failure")
 output = sparse.csc_matrix(users_mat)
-sparse.save_npz(directory_path + 'data/dense_user_mat.npz', output)
+sparse.save_npz(directory_path + 'data/user_mat_01.npz', output)
 
 # Delete old entries in user_map
 new_size = users_mat.shape[0]
@@ -150,6 +195,7 @@ for user in list(users_map.keys()):
     if new_index >= new_size:
         del users_map[user]
 
+<<<<<<< HEAD
 # update games index map
 pickle_out = open(directory_path + "data/games_dense.p", 'wb')
 pickle.dump(games, pickle_out)
@@ -159,3 +205,29 @@ pickle_out.close()
 pickle_out = open(directory_path + "data/user_map_dense.p", 'wb')
 pickle.dump(users_map, pickle_out)
 pickle_out.close()
+=======
+#update games index map
+pickle_out = open(directory_path + "data/games_01.p", 'wb')
+pickle.dump(games, pickle_out)
+pickle_out.close()
+
+#update users index map
+pickle_out = open(directory_path + "data/user_map_01.p", 'wb')
+pickle.dump(users_map, pickle_out)
+pickle_out.close()
+
+# open users map 
+users = {}
+with open(directory_path + 'data/users.p', 'rb') as f: 
+  users = pickle.load(f)
+  f.close()
+
+final_users = {}
+for user in list(users_map.keys()):
+  final_users[user] = users[user]
+
+#update users index map
+pickle_out = open(directory_path + "data/users_01.p", 'wb')
+pickle.dump(final_users, pickle_out)
+pickle_out.close()
+>>>>>>> 2dece476767cfd83ff5ac4634e0be4f1f41bf09b

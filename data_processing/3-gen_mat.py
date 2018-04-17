@@ -43,9 +43,9 @@ for user, games_dict in users.items():
   i = i + 1
 
 user_mat = sparse.csc_matrix(user_mat)
-sparse.save_npz(directory_path + 'data/user_mat.npz', user_mat)
+sparse.save_npz(directory_path + 'data/small_user_mat.npz', user_mat)
 
-pickle_out = open(directory_path + 'data/user_map.p', 'wb')
+pickle_out = open(directory_path + 'data/small_user_map.p', 'wb')
 pickle.dump(users_map, pickle_out)
 pickle_out.close()
 

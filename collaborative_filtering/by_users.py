@@ -1,74 +1,55 @@
 #!/usr/bin/env python3
 import pickle
 import numpy as np
+import math
 import scipy.stats
+import scipy.sparse as sparse
 
-# variables
-FILE_PATH = "./data/"
+# variablesp
+FILE_PATH = "../data/"
 
 
 def main():
-    dev_users, train_users, test_users = load_data()
-    small_users = load_small_data()
-    learn(small_users)
+    data = load_data('user_mat.npz')
+    similarity = learn_all(data)
+    print(similarity[0])
+    inx = get_top_k(similarity[0], 2)
+    print('INDICES')
+    print(inx)
     print('DONE')
 
 
-def load_small_data():
-    print('LOADING SMALL DATA')
-    with open(FILE_PATH + 'small_user_map.p', 'rb') as f:
-        small_users = pickle.load(f)
-    print('SMALL DATA LOADED')
-    return small_users
+def load_data(file_name):
+    print('LOADING DATA')
+    return sparse.load_npz(FILE_PATH + file_name)
 
 
-def load_data():
-    print('LOADING DATA...')
-    with open(FILE_PATH + 'dev_users.p', 'rb') as f:
-        dev_users = pickle.load(f)
-    with open(FILE_PATH + 'train_users.p', 'rb') as f:
-        train_users = pickle.load(f)
-    with open(FILE_PATH + 'test_users.p', 'rb') as f:
-        test_users = pickle.load(f)
-    print('DATA LOADED')
-    return dev_users, train_users, test_users
+def learn_all(data):
+    # user by game
+    num_users, num_games = np.shape(data)
+    sim_pearson = np.zeros((num_users, num_users))
+
+    for u1 in range(num_users):
+        sim_pearson[u1] = learn_row(u1, data, num_users)
+
+    return sim_pearson
 
 
-def learn(users):
-    print('LEARNING...')
-    # initialize matrix
-    n = len(users)
-    print(n)
+def learn_row(row_inx, A, length):
+    data_1 = A[row_inx, :].A[0]
+    arr = []
+    for i in range(length):
+        data_2 = A[i, :].A[0]
+        r, p = scipy.stats.pearsonr(data_1, data_2)
+        if math.isnan(r):
+            r = 0
+        arr.append(r)
 
-    sim_pearson = np.zeros((n, n))
-    mean_rating = []
-    user_map = []
+    return arr
 
-    for key
 
-    # calculate mean rating for each user
-    # we use hours played as a proxy for the mean rating for each user
-    for key, value in get_items(users):
-        user_map.append(key)
-
-        hours = 0
-        for k, v in get_items(value):
-            hours += v
-
-        if len(value) != 0:
-            mean = hours / len(value)
-        else:
-            mean = 0
-
-        mean_rating.append(mean)
-
-    print(mean_rating)
-
-    # TODO: calculate Pearson correlation coefficient
-    # use scipy.stats.pearsonr(x, y)
-
-    # TODO: calculate neighborhood-based predictor function
-    print('MODEL LEARNED')
+def get_top_k(A, k):
+    return np.argpartition(A, -k)
 
 
 def predict():
@@ -79,11 +60,6 @@ def evaluate():
     print('hello')
     # TODO: calculate MAE
     # TODO: calculate RMSE
-
-
-def get_items(dict_object):
-    for key in dict_object:
-        yield key, dict_object[key]
 
 
 # run

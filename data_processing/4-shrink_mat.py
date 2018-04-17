@@ -23,4 +23,7 @@ proj_mat = sparse.csc_matrix(proj_mat)
 
 reduced_mat = 1/math.sqrt(k) * (users_mat * proj_mat)
 
-open
+#update users index map
+pickle_out = open(directory_path + "data/reduced_user_mat.p", 'wb')
+pickle.dump(reduced_mat, pickle_out)
+pickle_out.close()

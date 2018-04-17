@@ -1,14 +1,15 @@
+#!/usr/bin/env python3
 import pickle
 import numpy as np
 import scipy.sparse as sparse
 import math
 
 # Parameters
-directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/" # Path to git repo on your machine
-n = 500 # Number of users
+directory_path = "/Users/stephanieshi/Documents/Projects/cis520/" # Path to git repo on your machine
+n = 40 # Number of users
 
 users_map = {}
-with open(directory_path + 'data/train_users.p', 'rb') as f: 
+with open(directory_path + 'data/train_users.p', 'rb') as f:
   users_map = pickle.load(f)
   f.close()
 

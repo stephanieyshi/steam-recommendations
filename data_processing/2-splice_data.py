@@ -6,27 +6,27 @@ import scipy
 games1 = []
 games2 = []
 with open('./data/temp/games1.pickle', 'rb') as f:
-  games1 = pickle.load(f)
-  f.close()
+    games1 = pickle.load(f)
+    f.close()
 
-with open('./data/temp/games2.pickle', 'rb') as r: 
-  games2 = pickle.load(r)
-  r.close
+with open('./data/temp/games2.pickle', 'rb') as r:
+    games2 = pickle.load(r)
+    r.close
 games = list(set(games1 + games2))
 final_games = {}
 i = 0
-for game in games: 
-  final_games[game] = i
-  i = i + 1
+for game in games:
+    final_games[game] = i
+    i = i + 1
 
-# Combine users data into a single users list 
-with open('./data/temp/users1.pickle', 'rb') as f: 
-  users1 = pickle.load(f)
-  f.close()
+# Combine users data into a single users list
+with open('./data/temp/users1.pickle', 'rb') as f:
+    users1 = pickle.load(f)
+    f.close()
 
-with open('./data/temp/users2.pickle', 'rb') as f: 
-  users2 = pickle.load(f)
-  f.close()
+with open('./data/temp/users2.pickle', 'rb') as f:
+    users2 = pickle.load(f)
+    f.close()
 
 print(len(users2))
 print(len(users1))
@@ -53,16 +53,16 @@ dev_users = test_users[100000:]
 test_users = test_users[0:100000]
 
 test_data = {}
-dev_data = {} 
+dev_data = {}
 
 print("Data split")
 
-for user in test_users: 
-  test_data[user] = users[user] 
-  del users[user]
-for user in dev_users: 
-  dev_data[user] = users[user]
-  del users[user]
+for user in test_users:
+    test_data[user] = users[user]
+    del users[user]
+for user in dev_users:
+    dev_data[user] = users[user]
+    del users[user]
 
 print("Dictionary split")
 
@@ -77,4 +77,3 @@ pickle_out.close()
 pickle_out = open("./data/test_users.p", 'wb')
 pickle.dump(test_data, pickle_out)
 pickle_out.close()
-

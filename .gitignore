@@ -3,3 +3,5 @@ env/
 venv/
 subset*
 data/train_users.csv
+data/test_users.csv
+.vscode/

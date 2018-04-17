@@ -4,7 +4,7 @@ import scipy.sparse as sparse
 import math
 
 #Parameters
-target = .03  # Gives the target sparsity
+target = .01  # Gives the target sparsity
 directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/" # Path to git repo on your machine
 
 users_mat = sparse.load_npz(directory_path + 'data/user_mat.npz')
@@ -155,7 +155,7 @@ if not problem:
 else:
   print("There's an indexing failure")
 output = sparse.csc_matrix(users_mat)
-sparse.save_npz(directory_path + 'data/user_mat_03.npz', output)
+sparse.save_npz(directory_path + 'data/user_mat_01.npz', output)
 
 # Delete old entries in user_map 
 new_size = users_mat.shape[0]
@@ -165,12 +165,12 @@ for user in list(users_map.keys()):
     del users_map[user]
 
 #update games index map
-pickle_out = open(directory_path + "data/games_03.p", 'wb')
+pickle_out = open(directory_path + "data/games_01.p", 'wb')
 pickle.dump(games, pickle_out)
 pickle_out.close()
 
 #update users index map
-pickle_out = open(directory_path + "data/user_map_03.p", 'wb')
+pickle_out = open(directory_path + "data/user_map_01.p", 'wb')
 pickle.dump(users_map, pickle_out)
 pickle_out.close()
 
@@ -185,6 +185,6 @@ for user in list(users_map.keys()):
   final_users[user] = users[user]
 
 #update users index map
-pickle_out = open(directory_path + "data/users_03.p", 'wb')
+pickle_out = open(directory_path + "data/users_01.p", 'wb')
 pickle.dump(final_users, pickle_out)
 pickle_out.close()

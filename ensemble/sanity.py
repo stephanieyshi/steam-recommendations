@@ -42,7 +42,7 @@ for user, game_dict in users.items():
   if len(game_dict) == 0: 
     emp_count = emp_count + 1
   for game, hours in list(game_dict.items()):
-    if hours < 200000:
+    if hours < 50000:
       curr_dict[game] = hours
       if game not in new_games:
         new_games[game] = j

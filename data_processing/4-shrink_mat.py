@@ -10,6 +10,7 @@ directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
 
 users_mat = sparse.load_npz(directory_path + 'data/user_mat.npz')
 n = users_mat.shape[0]
+
 d = users_mat.shape[1]
 k = math.ceil(math.log(n/(epsilon**2), 2))
 reduction_factor = math.sqrt(d)

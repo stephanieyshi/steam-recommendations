@@ -5,7 +5,7 @@ import math
 import scipy.stats
 import scipy.sparse as sparse
 
-# variablesp
+# variables
 FILE_PATH = "../data/"
 
 
@@ -48,18 +48,17 @@ def learn_row(row_inx, A, length):
     return arr
 
 
+# returns indices of top k closest users
 def get_top_k(A, k):
     return np.argpartition(A, -k)
 
 
-def predict():
+def predict(data, similar_users, user_id, game_id):
     print('PREDICTING')
+    other_predictions = []
 
+    # TODO:
 
-def evaluate():
-    print('hello')
-    # TODO: calculate MAE
-    # TODO: calculate RMSE
 
 
 # run

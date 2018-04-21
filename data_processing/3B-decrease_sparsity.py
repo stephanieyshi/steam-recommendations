@@ -48,7 +48,7 @@ ordered_cols = np.argsort(inverse_sparsity)
 total = np.sum(inverse_sparsity)
 # print(type(total))
 # print(total)
-sparsity = total/(inverse_sparsity.shape[1] * n)
+sparsity = total / (inverse_sparsity.shape[1] * n)
 remove_cols = []
 org_cols = inverse_sparsity.shape[1]
 print("Done column arrangement")
@@ -107,24 +107,21 @@ while sparsity < target:
     # print(total)
     # print(type(total))
 
-    # Remove k users with lowest sparsity
-    user_batches = user_batches + 1
-    ceiling_entries_removed = user_nonzero[((user_nonzero.shape[0]-1) -
-                                            (user_remove_rate*user_batches)):
-                                           (user_nonzero.shape[0]-1) -
-                                           user_remove_rate*(user_batches-1)]
-    ceiling_entries_removed = np.sum(
-        ceiling_entries_removed) - user_remove_rate
-    ceiling_entries_removed = max(ceiling_entries_removed, 0)
-    total = total - ceiling_entries_removed
-    sparsity = total/((inverse_sparsity.shape[1] - len(remove_cols)) *
-                      (n-(user_batches*user_remove_rate)))
-    # print(sparsity)
-    # print(user_batches)
-    # print(user_remove_rate)
-    # print(n-(user_batches*user_remove_rate))
-    ordered_cols = np.delete(ordered_cols, 0, 1)
-    # print(ordered_cols.shape[1])
+  # Remove k users with lowest sparsity
+  user_batches = user_batches + 1
+  ceiling_entries_removed = user_nonzero[((user_nonzero.shape[0]-1) - (user_remove_rate*user_batches)):
+    (user_nonzero.shape[0]-1) - user_remove_rate*(user_batches-1)]
+  ceiling_entries_removed = np.sum(ceiling_entries_removed) - user_remove_rate
+  ceiling_entries_removed = max(ceiling_entries_removed, 0)
+  total = total - ceiling_entries_removed
+  sparsity = total/((inverse_sparsity.shape[1] - len(remove_cols)) *
+   (n-(user_batches*user_remove_rate)))
+  # print(sparsity)
+  # print(user_batches)
+  # print(user_remove_rate)
+  # print(n-(user_batches*user_remove_rate))
+  ordered_cols = np.delete(ordered_cols, 0, 1)
+  # print(ordered_cols.shape[1])
 
 print("Done sparsity computation")
 
@@ -145,8 +142,8 @@ print("Done games map update")
 # Remove relevant columns from matrix:
 users_mat = np.delete(users_mat, np.array(remove_cols), 1)
 
-# Remove relevant users from the matrix:
-users_mat = users_mat[0:users_mat.shape[0]-user_batches*user_remove_rate, ]
+#Remove relevant users from the matrix:
+users_mat = users_mat[0:users_mat.shape[0]-user_batches*user_remove_rate,]
 
 print("Done updating matrix")
 
@@ -156,7 +153,7 @@ print(sparsity)
 print(len(remove_cols))
 print(org_cols - new_cols)
 print(n - users_mat.shape[0])
-print(user_batches*user_remove_rate)
+print(user_batches * user_remove_rate)
 
 curr_users = users_mat.shape[0]
 
@@ -179,31 +176,27 @@ for user in list(users_map.keys()):
     if new_index >= new_size:
         del users_map[user]
 
-# update games index map
-pickle_out = open(output_games_path, 'wb')
+#update games index map
+pickle_out = open(directory_path + "data/games_01.p", 'wb')
 pickle.dump(games, pickle_out)
 pickle_out.close()
 
-# update users index map
-pickle_out = open(output_users_map_mat, 'wb')
+#update users index map
+pickle_out = open(directory_path + "data/user_map_01.p", 'wb')
 pickle.dump(users_map, pickle_out)
 pickle_out.close()
 
 # open users map
 users = {}
-with open(input_users_path, 'rb') as f:
-    users = pickle.load(f)
-    f.close()
+with open(directory_path + 'data/users.p', 'rb') as f: 
+  users = pickle.load(f)
+  f.close()
 
 final_users = {}
 for user in list(users_map.keys()):
-    curr_game_dict = users[user]
-    for game in list(curr_game_dict.keys()):
-        if game not in games:
-            del curr_game_dict[game]
-    final_users[user] = curr_game_dict
+  final_users[user] = users[user]
 
-# update users index map
-pickle_out = open(output_users_path, 'wb')
+#update users index map
+pickle_out = open(directory_path + "data/users_01.p", 'wb')
 pickle.dump(final_users, pickle_out)
 pickle_out.close()

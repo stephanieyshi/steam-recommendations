@@ -5,3 +5,8 @@ subset*
 data/train_users.csv
 data/test_users.csv
 .vscode/
+data/*
+data/train_users.p
+data/test_users.p
+data/train_games.p
+data/test_games.p

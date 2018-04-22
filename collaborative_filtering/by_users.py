@@ -28,7 +28,7 @@ def main():
         # print(model)
         print(predictions)
         print(get_top_k(predictions, 10, user_inx))
-        print(rmse(data[0, :].A[0], predictions))
+        print(rmse(data[user_inx, :].A[0], predictions))
 
 
 def load_data(file_name):

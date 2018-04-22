@@ -16,7 +16,7 @@ from surprise import SVD, Reader, Dataset, KNNBasic, KNNWithMeans, \
     NormalPredictor, NMF, accuracy
 
 # Parameters
-it = 10  # number of iterations
+it = 10    # number of iterations
 epochs = 20  # epochs for each model
 target_name = '04'  # density of the data
 subset_size = .7  # size of subset for each  as a fraction of total data

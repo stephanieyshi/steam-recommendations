@@ -8,27 +8,32 @@ from sklearn.metrics import mean_squared_error
 
 # variables
 FILE_PATH = "../data/"
+TRAIN_DATA = ""
+TEST_DATA = ""
 
 
 def main():
     k = 5
     user_inx = 0
-    game_inx = 3
-    data = load_data('small_user_mat.npz')
-    num_users, num_games = np.shape(data)
+    train_data = load_data(TRAIN_DATA)
+    test_data = load_data(TEST_DATA)
+    num_users, num_games = np.shape(train_data)
 
     models = ['pearson', 'cosine', 'jaccard']
 
     for model in models:
-        similarity = learn_all(data, model)
+        similarity = learn_all(train_data, model)
         similar_users = get_top_k(similarity[user_inx], k, user_inx)
-        predictions = []
+        predictions_train = []
+        predictions_test = []
         for game_inx in range(num_games):
-            predictions.append(predict(data, similarity, similar_users, user_inx, game_inx))
-        # print(model)
-        print(predictions)
-        print(get_top_k(predictions, 10, user_inx))
-        print(rmse(data[user_inx, :].A[0], predictions))
+            predictions_train.append(predict(train_data, similarity, similar_users, user_inx, game_inx))
+            predictions_test.append(predict(train_data, similarity, similar_users, user_inx, game_inx))
+        print(get_top_k(predictions_train, 10, user_inx))
+        print('TRAIN ERROR')
+        print(rmse(test_data[user_inx, :].A[0], predictions_train))
+        print('TEST ERROR')
+        print(rmse(test_data[user_inx, :].A[0], predictions_test))
 
 
 def load_data(file_name):

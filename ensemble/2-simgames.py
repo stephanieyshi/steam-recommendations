@@ -9,21 +9,21 @@ import scipy.optimize as optimize
 # Parameters
 directory_path = "./../"
 
-with open(directory_path + 'data/train_games_04.p', 'rb') as f:
+with open(directory_path + 'data/train_games_08.p', 'rb') as f:
     games = pickle.load(f)
     f.close()
 
 users_map = {}
-with open(directory_path + 'data/train_user_map_04.p', 'rb') as f:
+with open(directory_path + 'data/train_user_map_08.p', 'rb') as f:
     users_map = pickle.load(f)
     f.close()
 
 users = {}
-with open(directory_path + 'data/train_users_04.p', 'rb') as f:
+with open(directory_path + 'data/train_users_08.p', 'rb') as f:
     users = pickle.load(f)
     f.close()
 
-users_mat = sparse.load_npz(directory_path + 'data/train_user_mat_04.npz')
+users_mat = sparse.load_npz(directory_path + 'data/train_user_mat_08.npz')
 entries = users_mat.data
 
 num_games = users_mat.shape[1]
@@ -40,6 +40,6 @@ for i in range(num_games):
 
 pearson_mat = pearson_mat + np.transpose(pearson_mat)
 
-pickle_out = open(directory_path + "data/train_pearson_04.p", 'wb')
+pickle_out = open(directory_path + "data/train_pearson_08.p", 'wb')
 pickle.dump(pearson_mat, pickle_out)
 pickle_out.close()

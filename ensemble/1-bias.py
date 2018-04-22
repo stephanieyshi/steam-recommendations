@@ -5,27 +5,29 @@ import scipy.sparse as sparse
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import scipy.optimize as optimize
+import sys
 
 # Parameters
 directory_path = "./../"
-epochs = 3  # number of iterations over observations
-eta = .0001  # grad descent step size
+epochs = 50  # number of iterations over observations
+threshold = 100  # convergence threshhold
+eta = .008  # grad descent step size
 
-with open(directory_path + 'data/train_games_04.p', 'rb') as f:
+with open(directory_path + 'data/train_games_08.p', 'rb') as f:
     games = pickle.load(f)
     f.close()
 
 users_map = {}
-with open(directory_path + 'data/train_user_map_04.p', 'rb') as f:
+with open(directory_path + 'data/train_user_map_08.p', 'rb') as f:
     users_map = pickle.load(f)
     f.close()
 
 users = {}
-with open(directory_path + 'data/train_users_04.p', 'rb') as f:
+with open(directory_path + 'data/train_users_08.p', 'rb') as f:
     users = pickle.load(f)
     f.close()
 
-users_mat = sparse.load_npz(directory_path + 'data/train_user_mat_04.npz')
+users_mat = sparse.load_npz(directory_path + 'data/train_user_mat_08.npz')
 entries = users_mat.data
 
 # Global mean
@@ -57,19 +59,20 @@ def bias_func(users_mat, user_bias, game_bias):
 
 
 print("Beginning prior")
-
-temp_dense = users_mat.todense()
-user_bias = np.divide(np.sum(temp_dense, axis=1),
-                      np.count_nonzero(temp_dense, axis=1))
-user_bias = np.squeeze(np.reshape(user_bias, (num_users, 1))).flatten()
-print(user_bias)
-
-game_bias = np.divide(np.sum(temp_dense, axis=0),
-                      np.count_nonzero(temp_dense, axis=0))
-game_bias = np.squeeze(np.reshape(game_bias, (num_games, 1))).flatten()
-print(game_bias)
-
-del temp_dense
+user_bias = np.zeros((1, users_mat.shape[0]))
+game_bias = np.zeros((1, users_mat.shape[1]))
+# temp_dense = users_mat.todense()
+# user_bias = np.divide(np.sum(temp_dense, axis=1),
+#                       np.count_nonzero(temp_dense, axis=1))
+# user_bias = np.squeeze(np.reshape(user_bias, (num_users, 1))).flatten()
+# print(user_bias)
+#
+# game_bias = np.divide(np.sum(temp_dense, axis=0),
+#                       np.count_nonzero(temp_dense, axis=0))
+# game_bias = np.squeeze(np.reshape(game_bias, (num_games, 1))).flatten()
+# print(game_bias)
+#
+# del temp_dense
 
 # prior = np.zeros((num_users + num_games))
 # prior[:num_users] = user_bias_prior
@@ -96,23 +99,37 @@ print("Intelligent prior done")
 print(game_bias.shape)
 print(user_bias.shape)
 
+curr_funct = bias_func(users_mat, user_bias, game_bias)
 print("Objective function value: " +
-      str(bias_func(users_mat, user_bias, game_bias)))
-for i in range(epochs):
-    update_bi = np.zeros(game_bias.shape)
-    update_bu = np.zeros(user_bias.shape)
+      str(curr_funct))
+prev_funct = 0
+diff = 100000000
+curr_epoch = 0
+while diff > threshold and curr_epoch < epochs:
+    # update_bi = np.zeros(game_bias.shape)
+    # update_bu = np.zeros(user_bias.shape)
     for user, item, rui in zip(users_mat.row, users_mat.col, users_mat.data):
-        update_bi[0, item] = update_bi[0, item] + 2 * eta * \
+        bi_new = game_bias[0, item] + 2 * eta * \
             (rui - user_bias[0, user] - game_bias[0, item])
-        update_bu[0, user] = update_bu[0, user] + 2 * eta * \
+        bu_new = user_bias[0, user] + 2 * eta * \
             (rui - user_bias[0, user] - game_bias[0, item])
-    user_bias = update_bu + user_bias
-    game_bias = update_bi + game_bias
+        user_bias[0, user] = bu_new
+        game_bias[0, item] = bi_new
+    #     update_bi[0, item] = update_bi[0, item] + 2 * eta * \
+    #         (rui - user_bias[0, user] - game_bias[0, item])
+    #     update_bu[0, user] = update_bu[0, user] - 2 * eta * \
+    #         (rui - user_bias[0, user] - game_bias[0, item])
+    # user_bias = update_bu + user_bias
+    # game_bias = update_bi + game_bias
+    curr_epoch = curr_epoch + 1
+    prev_funct = curr_funct
+    curr_funct = bias_func(users_mat, user_bias, game_bias)
+    diff = prev_funct - curr_funct
     print("Objective function value: " +
-          str(bias_func(users_mat, user_bias, game_bias)))
+          str(curr_funct))
+    print("Objective function imporvement: " + str(diff))
 
-pickle_out = open(directory_path + "data/train_bias_04.p", 'wb')
-pickle.dump(mu, pickle_out)
-pickle.dump(user_bias, pickle_out)
-pickle.dump(game_bias, pickle_out)
+outputs = (mu, user_bias, game_bias)
+pickle_out = open(directory_path + "data/bias_exp.p", 'wb')
+pickle.dump(outputs, pickle_out)
 pickle_out.close()

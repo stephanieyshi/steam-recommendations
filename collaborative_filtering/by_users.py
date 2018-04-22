@@ -4,17 +4,31 @@ import math
 import scipy.stats
 import scipy.sparse as sparse
 from statistics import mean
+from sklearn.metrics import mean_squared_error
 
 # variables
 FILE_PATH = "../data/"
 
 
 def main():
-    data = load_data('user_mat.npz')
-    similarity = learn_all(data, 'cosine')
-    similar_users = get_top_k(similarity[0], 2, 0)
-    prediction = predict(data, similarity, similar_users, 1, 3)
-    print(prediction)
+    k = 5
+    user_inx = 0
+    game_inx = 3
+    data = load_data('small_user_mat.npz')
+    num_users, num_games = np.shape(data)
+
+    models = ['pearson', 'cosine', 'jaccard']
+
+    for model in models:
+        similarity = learn_all(data, model)
+        similar_users = get_top_k(similarity[user_inx], k, user_inx)
+        predictions = []
+        for game_inx in range(num_games):
+            predictions.append(predict(data, similarity, similar_users, user_inx, game_inx))
+        # print(model)
+        print(predictions)
+        print(get_top_k(predictions, 10, user_inx))
+        print(rmse(data[0, :].A[0], predictions))
 
 
 def load_data(file_name):
@@ -28,6 +42,8 @@ def learn_all(data, metric):
 
     for u1 in range(num_users):
         sim[u1] = learn_row(u1, data, metric)
+        # if u1 % 10 == 0:
+            # print(u1)
 
     return sim
 
@@ -81,6 +97,10 @@ def predict(data, similarity, similar_users, user_inx, game_inx):
 
 def mean_prediction(data, user_inx):
     return mean(data[user_inx, :].A[0])
+
+
+def rmse(actual, predicted):
+    return mean_squared_error(actual, predicted)
 
 
 # run

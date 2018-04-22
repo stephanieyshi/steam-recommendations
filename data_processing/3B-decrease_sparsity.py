@@ -6,17 +6,18 @@ import math
 # Parameters
 # Path to git repo on your machine
 directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
-target_name = "04"  # Name of density to be generated
+target_name = "08"  # Name of density to be generated
 type_name = "train"  # train or test
+target = .08
 
-mat_path = directory_path + 'data/' + type_name + '_user_mat_' + '.npz'
+mat_path = directory_path + 'data/' + type_name + '_user_mat' + '.npz'
 games_path = directory_path + 'data/' + type_name + '_games.p'
 users_map_path = directory_path + 'data/' + type_name + '_user_map.p'
 output_mat_path = directory_path + 'data/' + \
     type_name + '_user_mat_' + target_name + '.npz'
 output_games_path = directory_path + "data/" + \
     type_name + '_games_' + target_name + ".p"
-output_users_map_mat = directory_path + "data/" + \
+output_users_map_path = directory_path + "data/" + \
     type_name + '_user_map_' + target_name + ".p"
 input_users_path = directory_path + 'data/' + type_name + '_users.p'
 output_users_path = directory_path + "data/" + \
@@ -49,6 +50,7 @@ total = np.sum(inverse_sparsity)
 # print(type(total))
 # print(total)
 sparsity = total / (inverse_sparsity.shape[1] * n)
+print(sparsity)
 remove_cols = []
 org_cols = inverse_sparsity.shape[1]
 print("Done column arrangement")
@@ -99,6 +101,7 @@ user_batches = 0
 print("Beginning sparsity computation")
 
 while sparsity < target:
+    print(sparsity)
     # Remove game with the lowest sparsity
     targ_col = ordered_cols[0, 0]
     # print(targ_col)
@@ -168,8 +171,10 @@ else:
     print("There's an indexing failure")
 output = sparse.csc_matrix(users_mat)
 sparse.save_npz(output_mat_path, output)
+print(output.shape)
 
 # Delete old entries in user_map
+# THIS IS A PROBLEM
 new_size = users_mat.shape[0]
 for user in list(users_map.keys()):
     new_index = users_map[user]
@@ -181,8 +186,8 @@ pickle_out = open(directory_path + "data/games_01.p", 'wb')
 pickle.dump(games, pickle_out)
 pickle_out.close()
 
-#update users index map
-pickle_out = open(directory_path + "data/user_map_01.p", 'wb')
+# update users index map
+pickle_out = open(output_users_map_path, 'wb')
 pickle.dump(users_map, pickle_out)
 pickle_out.close()
 
@@ -194,9 +199,13 @@ with open(directory_path + 'data/users.p', 'rb') as f:
 
 final_users = {}
 for user in list(users_map.keys()):
-  final_users[user] = users[user]
+    final_users[user] = users[user]
 
-#update users index map
-pickle_out = open(directory_path + "data/users_01.p", 'wb')
+# for user, game_dict in final_users.items():
+#     for game, hours in game_dict.items():
+#         print(type(hours))
+
+# update users index map
+pickle_out = open(output_users_path, 'wb')
 pickle.dump(final_users, pickle_out)
 pickle_out.close()

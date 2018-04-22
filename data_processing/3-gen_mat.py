@@ -5,14 +5,15 @@ import os
 
 # Parameters
 directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
+type_name = "train"
 
 games = {}
-with open(directory_path + 'data/train_games_04.p', 'rb') as f:
+with open(directory_path + 'data/' + type_name + '_games.p', 'rb') as f:
     games = pickle.load(f)
     f.close()
 
 users = {}
-with open(directory_path + 'data/train_users_04.p', 'rb') as f:
+with open(directory_path + 'data/' + type_name + '_users.p', 'rb') as f:
     users = pickle.load(f)
     f.close()
 users_list = list(users.keys())
@@ -44,9 +45,10 @@ for user, games_dict in users.items():
     i = i + 1
 
 user_mat = sparse.csc_matrix(user_mat)
-sparse.save_npz(directory_path + 'data/train_user_mat_04.npz', user_mat)
+sparse.save_npz(directory_path + 'data/' +
+                type_name + '_user_mat.npz', user_mat)
 
-pickle_out = open(directory_path + 'data/train_user_map_04.p', 'wb')
+pickle_out = open(directory_path + 'data/' + type_name + '_user_map.p', 'wb')
 pickle.dump(users_map, pickle_out)
 pickle_out.close()
 

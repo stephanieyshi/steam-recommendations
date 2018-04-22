@@ -23,11 +23,11 @@ with open(directory_path + 'data/train_users.csv', 'rb') as f:
         total = total + 1
         if user not in users:
             game_dict = {}
-            game_dict[game] = hours
+            game_dict[game] = float(hours)
             users[user] = game_dict
         else:
             game_dict = users[user]
-            game_dict[game] = hours
+            game_dict[game] = float(hours)
             users[user] = game_dict
     f.close()
 
@@ -58,7 +58,7 @@ test_games = {}
 
 test_game_count = 0
 train_game_count = 0
-for users, game_dict in users.items():
+for user, game_dict in users.items():
     for game, hours in game_dict.items():
         decision = random.random()
         if decision < .1:
@@ -76,6 +76,8 @@ for users, game_dict in users.items():
                 train_users[user] = {}
             train_users[user][game] = hours
 
+print(len(train_users))
+print(len(test_users))
 pickle_out = open(directory_path + "data/train_games.p", 'wb')
 pickle.dump(train_games, pickle_out)
 pickle_out.close()

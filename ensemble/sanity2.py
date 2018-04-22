@@ -19,7 +19,7 @@ with open(directory_path + 'data/user_map.p', 'rb') as f:
     f.close()
 
 users = {}
-with open(directory_path + 'data/users.p', 'rb') as f:
+with open(directory_path + 'data/train_users_08.p', 'rb') as f:
     users = pickle.load(f)
     f.close()
 

@@ -5,7 +5,7 @@ import os
 
 # Parameters
 directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
-type_name = "train"
+type_name = "test"
 
 games = {}
 with open(directory_path + 'data/' + type_name + '_games.p', 'rb') as f:

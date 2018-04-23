@@ -16,7 +16,7 @@ from surprise import SVD, Reader, Dataset, KNNBasic, KNNWithMeans, \
     NormalPredictor, NMF, accuracy
 
 # Parameters
-it = 10    # number of iterations
+it = 25    # number of iterat ions
 epochs = 20  # epochs for each model
 target_name = '04'  # density of the data
 subset_size = .7  # size of subset for each  as a fraction of total data
@@ -49,6 +49,10 @@ ind = 0
 for user, game_dict in train_users.items():
     for game, hours in game_dict.items():
         train_list.append((user, game))
+        if hours > 6:
+            print("FUCK")
+        elif hours < 0:
+            print("DICK")
         game_dict[game] = (float(hours), ind)
         ind = ind + 1
 train_list = np.array(train_list, dtype=('str', 'str'))
@@ -74,7 +78,7 @@ beta = np.zeros(it)
 av_loss = 0
 # NOTE change rating scale
 reader = Reader(line_format='user item rating',
-                sep='\t', rating_scale=(-30, 30))
+                sep='\t', rating_scale=(0, 6))
 
 print('Setup complete')
 for i in range(it):

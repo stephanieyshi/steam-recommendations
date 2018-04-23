@@ -1,39 +1,59 @@
 #!/usr/bin/env python3
 import numpy as np
 import math
+import random
 import scipy.stats
 import scipy.sparse as sparse
 from statistics import mean
 from sklearn.metrics import mean_squared_error
 
 # variables
-FILE_PATH = "../data/"
-TRAIN_DATA = ""
-TEST_DATA = ""
+FILE_PATH = ""
+TEST_DATA = FILE_PATH + "test_user_mat.npz"
 
 
 def main():
-    k = 5
-    user_inx = 0
-    train_data = load_data(TRAIN_DATA)
+    ks = [5, 10, 15, 25, 50]
     test_data = load_data(TEST_DATA)
-    num_users, num_games = np.shape(train_data)
+    num_users, num_games = np.shape(test_data)
+
+    # pick some random users
+    users = []
+    for i in range(5):
+        users.append(random.randint(0, num_users - 1))
 
     models = ['pearson', 'cosine', 'jaccard']
 
     for model in models:
-        similarity = learn_all(train_data, model)
-        similar_users = get_top_k(similarity[user_inx], k, user_inx)
-        predictions_train = []
-        predictions_test = []
-        for game_inx in range(num_games):
-            predictions_train.append(predict(train_data, similarity, similar_users, user_inx, game_inx))
-            predictions_test.append(predict(train_data, similarity, similar_users, user_inx, game_inx))
-        print(get_top_k(predictions_train, 10, user_inx))
-        print('TRAIN ERROR')
-        print(rmse(test_data[user_inx, :].A[0], predictions_train))
-        print('TEST ERROR')
-        print(rmse(test_data[user_inx, :].A[0], predictions_test))
+        print('TRAINING MODEL: ' + model)
+        total_rmse = [0, 0, 0, 0, 0]
+        for user_inx in users:
+            print('PREDICTING FOR USER ' + str(user_inx))
+            similarity = learn_row(user_inx, test_data, model)
+            for k in ks:
+                print('VALUE OF K: ' + str(k))
+                similar_users = get_top_k(similarity, k, user_inx)
+                predictions_test = []
+                for game_inx in range(num_games):
+                    predictions_test.append(predict(test_data, similarity, similar_users, user_inx, game_inx))
+                this_rmse = rmse(test_data[user_inx, :].A[0], predictions_test)
+                print('TEST ERROR FOR USER ' + str(user_inx) + ': ' + str(this_rmse))
+                if k == 5:
+                    total_rmse[0] += this_rmse
+                elif k == 10:
+                    total_rmse[1] += this_rmse
+                elif k == 15:
+                    total_rmse[2] += this_rmse
+                elif k == 25:
+                    total_rmse[3] += this_rmse
+                else:
+                    total_rmse[4] += this_rmse
+
+        print('TOTAL SUM OF ERRORS:')
+        print(total_rmse)
+        avg_rmse = [math.sqrt(x/5) for x in total_rmse]
+        print('RMSE:')
+        print(avg_rmse)
 
 
 def load_data(file_name):
@@ -43,12 +63,10 @@ def load_data(file_name):
 def learn_all(data, metric):
     # user by game
     num_users, num_games = np.shape(data)
-    sim = np.zeros((num_users, num_users))
+    sim = sparse.zeros((num_users, num_users))
 
     for u1 in range(num_users):
         sim[u1] = learn_row(u1, data, metric)
-        # if u1 % 10 == 0:
-            # print(u1)
 
     return sim
 
@@ -92,7 +110,7 @@ def predict(data, similarity, similar_users, user_inx, game_inx):
     for other_user in similar_users:
         # compute mean of prediction of this user
         m = mean_prediction(data, other_user)
-        sum += similarity[user_inx, other_user] * (data[other_user, game_inx] - m)
+        sum += similarity[other_user] * (data[other_user, game_inx] - m)
 
     # want to predict
     denom = np.sum(np.absolute(similarity)[similar_users])

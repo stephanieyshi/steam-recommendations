@@ -6,9 +6,9 @@ import math
 # Parameters
 # Path to git repo on your machine
 directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
-target_name = "04"  # Name of density to be generated
+target_name = "08"  # Name of density to be generated
 type_name = "test"  # train or test
-target = .04
+target = .08
 
 mat_path = directory_path + 'data/' + type_name + '_user_mat' + '.npz'
 games_path = directory_path + 'data/' + type_name + '_games.p'

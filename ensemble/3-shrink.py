@@ -10,7 +10,7 @@ import scipy.optimize as optimize
 directory_path = "./../"  # path to directory
 # name of file containing global mean, user bias, and item bias
 type_name = "train"  # train or test
-size_name = "04"  # name of data density
+size_name = "08"  # name of data density
 shrinkage = 100  # Beta in shrinkage formula
 
 mat_name = type_name + "_user_mat_" + size_name + ".npz"  # name of user matrix

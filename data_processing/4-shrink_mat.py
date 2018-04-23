@@ -10,20 +10,23 @@ directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
 
 users_mat = sparse.load_npz(directory_path + 'data/user_mat.npz')
 n = users_mat.shape[0]
+
 d = users_mat.shape[1]
 k = math.ceil(math.log(n/(epsilon**2), 2))
 reduction_factor = math.sqrt(d)
 
-random_proj = stats.rv_discrete(name='rand_proj', values=([-1, 0, 1],
- [1/(2*reduction_factor), (1-1/reduction_factor), 1/(2*reduction_factor)]))
- 
+random_proj = stats.rv_discrete(name='rand_proj',
+                                values=([-1, 0, 1], [1/(2*reduction_factor),
+                                                     (1-1/reduction_factor),
+                                                     1/(2*reduction_factor)]))
+
 proj_mat = math.sqrt(reduction_factor)*np.array(random_proj.rvs(size=d*k))
 proj_mat = np.reshape(proj_mat, (d, k))
 proj_mat = sparse.csc_matrix(proj_mat)
 
 reduced_mat = 1/math.sqrt(k) * (users_mat * proj_mat)
 
-#update users index map
+# update users index map
 pickle_out = open(directory_path + "data/reduced_user_mat.p", 'wb')
-pickle.dump(reduced_mat, pickle_out)
+pickle.dump(reduc, pickle_out)
 pickle_out.close()

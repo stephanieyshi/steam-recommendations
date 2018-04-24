@@ -2,10 +2,8 @@
 import numpy as np
 import math
 import random
-import scipy.stats
 import scipy.sparse as sparse
 from statistics import mean
-from sklearn.metrics import mean_squared_error
 
 # variables
 FILE_PATH = ""
@@ -16,13 +14,14 @@ def main():
     ks = [5, 10, 15, 25, 50]
     test_data = load_data(TEST_DATA)
     num_users, num_games = np.shape(test_data)
+    num_test_users = 100
 
     # pick some random users
     users = []
-    for i in range(5):
+    for i in range(num_test_users):
         users.append(random.randint(0, num_users - 1))
 
-    models = ['pearson', 'cosine', 'jaccard']
+    models = ['pearson', 'cosine']
 
     for model in models:
         print('TRAINING MODEL: ' + model)
@@ -32,11 +31,14 @@ def main():
             similarity = learn_row(user_inx, test_data, model)
             for k in ks:
                 print('VALUE OF K: ' + str(k))
-                similar_users = get_top_k(similarity, k, user_inx)
+                actual_test = []
                 predictions_test = []
                 for game_inx in range(num_games):
-                    predictions_test.append(predict(test_data, similarity, similar_users, user_inx, game_inx))
-                this_rmse = rmse(test_data[user_inx, :].A[0], predictions_test)
+                    if test_data[user_inx, game_inx] != 0:
+                        actual_test.append(test_data[user_inx, game_inx])
+                        similar_users = get_top_k_game(test_data, similarity, k, user_inx, game_inx)
+                        predictions_test.append(predict(test_data, similarity, similar_users, user_inx, game_inx))
+                this_rmse = math.sqrt(se(actual_test, predictions_test) / len(actual_test))
                 print('TEST ERROR FOR USER ' + str(user_inx) + ': ' + str(this_rmse))
                 if k == 5:
                     total_rmse[0] += this_rmse
@@ -51,7 +53,7 @@ def main():
 
         print('TOTAL SUM OF ERRORS:')
         print(total_rmse)
-        avg_rmse = [math.sqrt(x/5) for x in total_rmse]
+        avg_rmse = [(x / num_test_users) for x in total_rmse]
         print('RMSE:')
         print(avg_rmse)
 
@@ -79,26 +81,78 @@ def learn_row(row_inx, A, metric):
         data_2 = A[i, :].A[0]
         if np.count_nonzero(data_1) != 0 and np.count_nonzero(data_2) != 0:
             if metric == 'cosine':
-                arr.append(1 - scipy.spatial.distance.cosine(data_1, data_2))
-            elif metric == 'jaccard':
-                arr.append(1 - scipy.spatial.distance.jaccard(data_1, data_2))
+                sim = calculate_cosine(data_1, data_2)
+                arr.append(sim)
             else:
-                r, p = scipy.stats.pearsonr(data_1, data_2)
-                if math.isnan(r):
-                    r = 0
-                arr.append(r)
+                sim = calculate_pearson(data_1, data_2)
+                arr.append(sim)
         else:
             arr.append(0)
 
     return arr
 
 
-# returns indices of top k closest users in ascending order except i (same user)
-def get_top_k(A, k, i):
-    temp = np.copy(A)
-    temp[i] = -2  # all other elements are [-1, 1]
-    ind = np.argpartition(temp, -k)[-k:]
-    return ind[np.argsort(temp[ind])[::-1]]
+def calculate_pearson(u1, u2):
+    mu_1 = mean(u1)
+    mu_2 = mean(u2)
+
+    # intersection
+    intersection = []
+    for i in range(len(u1)):
+        if u1[i] != 0 and u2[i] != 0:
+            intersection.append(i)
+
+    num = 0
+    denom_u1 = 0
+    denom_u2 = 0
+
+    for game in intersection:
+        num += (u1[game] - mu_1) * (u2[game] - mu_2)
+        denom_u1 += (u1[game] - mu_1) ** 2
+        denom_u2 += (u2[game] - mu_2) ** 2
+
+    denom = math.sqrt(denom_u1 * denom_u2)
+    if denom == 0:
+        return 0
+    else:
+        return num / denom
+
+
+def calculate_cosine(u1, u2):
+    # intersection
+    intersection = []
+    for i in range(len(u1)):
+        if u1[i] != 0 and u2[i] != 0:
+            intersection.append(i)
+
+    num = 0
+    denom_u1 = 0
+    denom_u2 = 0
+
+    for game in intersection:
+        num += u1[game] * u2[game]
+        denom_u1 += u1[game] ** 2
+        denom_u2 += u2[game] ** 2
+
+    denom = math.sqrt(denom_u1 * denom_u2)
+    if denom == 0:
+        return 0
+    else:
+        return num / denom
+
+
+def get_top_k_game(user_game_data, similarities, k, user_inx, game_inx):
+    similarities = np.array(similarities)
+    # print(similarities)
+    data_csr = user_game_data.tocsr()
+    indices = np.array((data_csr[:, game_inx] != 0).todense().nonzero()[0])
+    actual_similarities = similarities[indices]
+    x = actual_similarities.size
+    if x >= k:
+        ind = np.argpartition(actual_similarities, -k)[-k:]
+    else:
+        ind = np.argpartition(actual_similarities, -x)[-x:]
+    return indices[ind[np.argsort(actual_similarities[ind])[::-1]]]
 
 
 # indices of similar users
@@ -122,8 +176,8 @@ def mean_prediction(data, user_inx):
     return mean(data[user_inx, :].A[0])
 
 
-def rmse(actual, predicted):
-    return mean_squared_error(actual, predicted)
+def se(actual, predicted):
+    return np.sum((np.array(actual) - np.array(predicted)) ** 2)
 
 
 # run

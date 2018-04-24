@@ -6,9 +6,9 @@ import math
 # Parameters
 # Path to git repo on your machine
 directory_path = "C:/Users/bpiv4/Dropbox/CIS520/cis520/"
-target_name = "08"  # Name of density to be generated
+target_name = "04"  # Name of density to be generated
 type_name = "test"  # train or test
-target = .08
+target = .04
 
 mat_path = directory_path + 'data/' + type_name + '_user_mat' + '.npz'
 games_path = directory_path + 'data/' + type_name + '_games.p'
@@ -177,7 +177,6 @@ sparse.save_npz(output_mat_path, output)
 print(output.shape)
 
 # Delete old entries in user_map
-# THIS IS A PROBLEM
 new_size = users_mat.shape[0]
 for user in list(users_map.keys()):
     new_index = users_map[user]

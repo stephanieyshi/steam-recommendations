@@ -19,7 +19,7 @@ from surprise import SVD, Reader, Dataset, KNNBasic, KNNWithMeans, \
 it = 25    # number of iterat ions
 epochs = 20  # epochs for each model
 target_name = '04'  # density of the data
-subset_size = .7  # size of subset for each  as a fraction of total data
+subset_size = 1  # size of subset for each  as a fraction of total data
 factors = 100  # number of factors
 user_reg = .02
 game_reg = .02
@@ -51,7 +51,7 @@ for user, game_dict in train_users.items():
         train_list.append((user, game))
         if hours > 6:
             print("FUCK")
-        elif hours < 0:
+        elif hours < 1:
             print("DICK")
         game_dict[game] = (float(hours), ind)
         ind = ind + 1
@@ -78,7 +78,7 @@ beta = np.zeros(it)
 av_loss = 0
 # NOTE change rating scale
 reader = Reader(line_format='user item rating',
-                sep='\t', rating_scale=(0, 6))
+                sep='\t', rating_scale=(1, 6))
 
 print('Setup complete')
 for i in range(it):

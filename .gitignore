@@ -10,3 +10,6 @@ data/train_users.p
 data/test_users.p
 data/train_games.p
 data/test_games.p
+boost/bar.csv
+boost/bran.csv
+boost/curr_svd_data.csv

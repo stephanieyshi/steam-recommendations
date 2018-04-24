@@ -13,12 +13,19 @@ import random
 # path to directory
 directory_path = "./../"
 data_directory = directory_path + 'data/'
+k = 10
 
 with open(data_directory + 'train_bias_08.p', 'rb') as f:
     biases = pickle.load(f)
 mu = biases[0]
 buvec = biases[1]
 bivec = biases[2]
+
+init_mu = biases[0]
+init_buvec = biases[1]
+init_bivec = biases[2]
+
+del biases
 
 with open(data_directory + 'qi.p', 'rb') as f:
     q = pickle.load(f)
@@ -65,33 +72,36 @@ for epoch in range(num_epochs):
         uservect = user_mat[user, :]
         bu = buvec[0, user]
         bi = bivec[0, item]
-        buj = mu + bu + bi
-        user_holds_bool = uservect[0, orderdescending[0:9]] != 0
-        user_holds_indices = user_holds_bool
-        Rk = np.sum(user_holds_bool)
+        bui = mu + bu + bi
+        uhb = uservect[0, orderdescending[1:k]] != 0
+        Rk = np.sum(uhb)
         Rk = Rk + 1 * (Rk == 0)
         Rk_term = (1/(np.sqrt(Rk)))
-        inner_product = user_holds_bool.multiply(
-            uservect[0, orderdescending[0:9]])
-        summation = np.sum(-1 * inner_product *
-                           wij[item, orderdescending[0:9]]) + np.sum(
-            (mu+bu+bivec[0, orderdescending[0:9]]))
+        inner_term = uservect[0, orderdescending[1:k+1]] - \
+            (init_mu+init_buvec[0, user_ind] +
+             init_bivec[0, orderdescending[1:k+1]])
+        inner_sum = uhb.multiply(uservect[0, orderdescending[1:k]] -
+                                 (init_mu+init_bu[0, user] +
+                                  init_bivec[0, orderdescending[1:k]]))
+        summation = np.dot(inner_sum.toarray(),
+                           wij[orderdescending[1:k+1], game_ind])
+        rhat = bui + np.dot(q[item, :], p[user, :]) + Rk_term * summation
 
-        rhat = mu + bu + bi + \
-            np.dot(q[item, :], p[user, :]) + Rk_term * summation
         eui = rui - rhat
+
         buvec[0, user] = bu + gam * (eui - lam6*bu)
         bivec[0, item] = bi + gam * (eui - lam6*bi)
         q[item, :] = q[item, :] + \
             (gam2 * ((eui * p[user, :]) - lam7 * q[item, :]))
         p[user, :] = p[user, :] + \
             (gam2 * ((eui * q[item, :]) - lam7 * p[user, :]))
-        for spot in range(10):
-            wij[item, orderdescending[spot]] =
-            wij[item, orderdescending[spot]] + gam3 * (Rk_term * eui * (
-                uservect[0, orderdescending[spot]] - (
-                    mu+bu+bivec[0, orderdescending[spot]])) -
-                lam8*wij[item, orderdescending[spot]])
+        wij[item, orderdescending[1:k+1]] = wij[item,
+                                                orderdescending[1:k+1]] + \
+            gam3 * (Rk_term * eui * (
+                uservect[0, orderdescending[1:k+1]] - (
+                    mu+bu+bivec[0, orderdescending[1:k+1]])) -
+                    lam8*wij[item, orderdescending[1:k+1]])
+
         if (count % 1000 == 0):
             print(count)
             print(epoch)

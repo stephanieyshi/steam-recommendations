@@ -11,5 +11,5 @@ data/test_users.p
 data/train_games.p
 data/test_games.p
 boost/bar.csv
-boost/brand.csv
+boost/bran.csv
 boost/curr_svd_data.csv

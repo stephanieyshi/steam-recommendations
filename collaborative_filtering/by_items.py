@@ -7,15 +7,14 @@ from statistics import mean
 
 # variables
 FILE_PATH = ""
-TEST_DATA = FILE_PATH + "test_user_mat_02.npz"
+TEST_DATA = FILE_PATH + "test_user_mat.npz"
 
 
 def main():
     ks = [5, 10, 15, 25, 50]
     test_data = load_data(TEST_DATA)
-    test_data = test_data.transpose()
     num_users, num_games = np.shape(test_data)
-    num_test_users = 1
+    num_test_users = 100
 
     # pick some random users
     users = []
@@ -29,16 +28,16 @@ def main():
         total_rmse = [0, 0, 0, 0, 0]
         for user_inx in users:
             print('PREDICTING FOR USER ' + str(user_inx))
-            similarity = learn_row(user_inx, test_data, model)
             for k in ks:
-                print('VALUE OF K: ' + str(k))
                 actual_test = []
                 predictions_test = []
                 for game_inx in range(num_games):
+                    similarity = learn_by_game(game_inx, test_data, model)
                     if test_data[user_inx, game_inx] != 0:
+                        # try to predict this based on the similar items
                         actual_test.append(test_data[user_inx, game_inx])
-                        similar_users = get_top_k_game(test_data, similarity, k, user_inx, game_inx)
-                        predictions_test.append(predict(test_data, similarity, similar_users, user_inx, game_inx))
+                        similar_games = get_top_k_game(test_data, similarity, k, user_inx, game_inx)
+                        predictions_test.append(predict(test_data, similarity, similar_games, user_inx, game_inx))
                 this_rmse = math.sqrt(se(actual_test, predictions_test) / len(actual_test))
                 print('TEST ERROR FOR USER ' + str(user_inx) + ': ' + str(this_rmse))
                 if k == 5:
@@ -80,6 +79,25 @@ def learn_row(row_inx, A, metric):
     arr = []
     for i in range(length):
         data_2 = A[i, :].A[0]
+        if np.count_nonzero(data_1) != 0 and np.count_nonzero(data_2) != 0:
+            if metric == 'cosine':
+                sim = calculate_cosine(data_1, data_2)
+                arr.append(sim)
+            else:
+                sim = calculate_pearson(data_1, data_2)
+                arr.append(sim)
+        else:
+            arr.append(0)
+
+    return arr
+
+
+def learn_by_game(col_inx, A, metric):
+    length, width = np.shape(A)
+    data_1 = A[:, col_inx].A[0]
+    arr = []
+    for i in range(length):
+        data_2 = A[:, col_inx].A[0]
         if np.count_nonzero(data_1) != 0 and np.count_nonzero(data_2) != 0:
             if metric == 'cosine':
                 sim = calculate_cosine(data_1, data_2)

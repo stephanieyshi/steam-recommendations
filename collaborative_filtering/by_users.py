@@ -7,7 +7,7 @@ from statistics import mean
 
 # variables
 FILE_PATH = ""
-TEST_DATA = FILE_PATH + "test_user_mat.npz"
+TEST_DATA = FILE_PATH + "test_user_mat_02.npz"
 
 
 def main():
@@ -60,17 +60,6 @@ def main():
 
 def load_data(file_name):
     return sparse.load_npz(FILE_PATH + file_name)
-
-
-def learn_all(data, metric):
-    # user by game
-    num_users, num_games = np.shape(data)
-    sim = sparse.zeros((num_users, num_users))
-
-    for u1 in range(num_users):
-        sim[u1] = learn_row(u1, data, metric)
-
-    return sim
 
 
 def learn_row(row_inx, A, metric):
@@ -143,7 +132,6 @@ def calculate_cosine(u1, u2):
 
 def get_top_k_game(user_game_data, similarities, k, user_inx, game_inx):
     similarities = np.array(similarities)
-    # print(similarities)
     data_csr = user_game_data.tocsr()
     indices = np.array((data_csr[:, game_inx] != 0).todense().nonzero()[0])
     actual_similarities = similarities[indices]

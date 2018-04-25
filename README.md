@@ -1,6 +1,6 @@
 # The Steam Engine: A Recommendation System for Steam Users (CIS 520 Final Project)
 ## About
-Steam is a digital distribution platform in which users buy and play computer games.  We employ neighborhood, matrix factorization, and mixed collaborative filtering (CF) methods to predict the number of hours users will play games. In addition, we adapt a regression boosting frame-work for matrix factorization CF algorithms and apply it to the prediction task. We find that factorization methods outperform neighborhood methods, and a mixed approach outperforms both. Additionally, we find the boosting framework did not meaningful improve performance. To improve predictions, future research should incorporate user friendship networks.
+Steam is a video game distribution platform. We employ neighborhood, matrix factorization, and mixed collaborative filtering (CF) methods to predict the number of hours Steam users will play games. We also adapt a regression boosting framework for matrix factorization CF algorithms and apply it to the prediction task. We find that neighborhood methods outperform matrix factorization methods, and a mixed approach outperforms both. Additionally, we find the boosting framework did not meaningful improve performance. To improve predictions, future research should incorporate user friendship networks.  
 
 ## Team Members
 * Brandon Lin

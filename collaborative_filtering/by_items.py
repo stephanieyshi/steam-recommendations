@@ -7,14 +7,14 @@ from statistics import mean
 
 # variables
 FILE_PATH = ""
-TEST_DATA = FILE_PATH + "test_user_mat.npz"
+TEST_DATA = FILE_PATH + "test_user_mat_02.npz"
 
 
 def main():
     ks = [5, 10, 15, 25, 50]
     test_data = load_data(TEST_DATA)
     num_users, num_games = np.shape(test_data)
-    num_test_users = 100
+    num_test_users = 1
 
     # pick some random users
     users = []
@@ -28,31 +28,39 @@ def main():
         total_rmse = [0, 0, 0, 0, 0]
         for user_inx in users:
             print('PREDICTING FOR USER ' + str(user_inx))
-            for k in ks:
-                actual_test = []
-                predictions_test = []
-                for game_inx in range(num_games):
+            actual_test = []
+            predictions_test_5 = []
+            predictions_test_10 = []
+            predictions_test_15 = []
+            predictions_test_25 = []
+            predictions_test_50 = []
+            for game_inx in range(num_games):
+                if test_data[user_inx, game_inx] != 0:
+                    print('GAME ' + str(game_inx))
+                    print(test_data[user_inx, game_inx])
+                    actual_test.append(test_data[user_inx, game_inx])
                     similarity = learn_by_game(game_inx, test_data, model)
-                    if test_data[user_inx, game_inx] != 0:
-                        # try to predict this based on the similar items
-                        actual_test.append(test_data[user_inx, game_inx])
+                    # print(similarity)
+                    for k in ks:
                         similar_games = get_top_k_game(test_data, similarity, k, user_inx, game_inx)
-                        predictions_test.append(predict(test_data, similarity, similar_games, user_inx, game_inx))
-                this_rmse = math.sqrt(se(actual_test, predictions_test) / len(actual_test))
-                print('TEST ERROR FOR USER ' + str(user_inx) + ': ' + str(this_rmse))
-                if k == 5:
-                    total_rmse[0] += this_rmse
-                elif k == 10:
-                    total_rmse[1] += this_rmse
-                elif k == 15:
-                    total_rmse[2] += this_rmse
-                elif k == 25:
-                    total_rmse[3] += this_rmse
-                else:
-                    total_rmse[4] += this_rmse
+                        prediction = predict(test_data, similarity, similar_games, user_inx, game_inx)
+                        if k == 5:
+                            predictions_test_5.append(prediction)
+                        elif k == 10:
+                            predictions_test_10.append(prediction)
+                        elif k == 15:
+                            predictions_test_15.append(prediction)
+                        elif k == 25:
+                            predictions_test_25.append(prediction)
+                        else:
+                            predictions_test_50.append(prediction)
 
-        print('TOTAL SUM OF ERRORS:')
-        print(total_rmse)
+            total_rmse[0] += math.sqrt(se(actual_test, predictions_test_5) / len(actual_test))
+            total_rmse[1] += math.sqrt(se(actual_test, predictions_test_10) / len(actual_test))
+            total_rmse[2] += math.sqrt(se(actual_test, predictions_test_15) / len(actual_test))
+            total_rmse[3] += math.sqrt(se(actual_test, predictions_test_25) / len(actual_test))
+            total_rmse[4] += math.sqrt(se(actual_test, predictions_test_50) / len(actual_test))
+
         avg_rmse = [(x / num_test_users) for x in total_rmse]
         print('RMSE:')
         print(avg_rmse)
@@ -60,17 +68,6 @@ def main():
 
 def load_data(file_name):
     return sparse.load_npz(FILE_PATH + file_name)
-
-
-def learn_all(data, metric):
-    # user by game
-    num_users, num_games = np.shape(data)
-    sim = sparse.zeros((num_users, num_users))
-
-    for u1 in range(num_users):
-        sim[u1] = learn_row(u1, data, metric)
-
-    return sim
 
 
 def learn_row(row_inx, A, metric):
@@ -92,12 +89,14 @@ def learn_row(row_inx, A, metric):
     return arr
 
 
+# return the similarities of a game to all other games
 def learn_by_game(col_inx, A, metric):
     length, width = np.shape(A)
-    data_1 = A[:, col_inx].A[0]
+    data_1 = A[:, col_inx].transpose().toarray()[0]
     arr = []
-    for i in range(length):
-        data_2 = A[:, col_inx].A[0]
+    for i in range(width):
+        data_2 = A[:, i].transpose().toarray()[0]
+        # print(data_2)
         if np.count_nonzero(data_1) != 0 and np.count_nonzero(data_2) != 0:
             if metric == 'cosine':
                 sim = calculate_cosine(data_1, data_2)
@@ -111,49 +110,49 @@ def learn_by_game(col_inx, A, metric):
     return arr
 
 
-def calculate_pearson(u1, u2):
-    mu_1 = mean(u1)
-    mu_2 = mean(u2)
+def calculate_pearson(g1, g2):
+    mu_1 = mean(g1)
+    mu_2 = mean(g2)
 
     # intersection
     intersection = []
-    for i in range(len(u1)):
-        if u1[i] != 0 and u2[i] != 0:
+    for i in range(len(g1)):
+        if g1[i] != 0 and g2[i] != 0:
             intersection.append(i)
 
     num = 0
-    denom_u1 = 0
-    denom_u2 = 0
+    denom_g1 = 0
+    denom_g2 = 0
 
-    for game in intersection:
-        num += (u1[game] - mu_1) * (u2[game] - mu_2)
-        denom_u1 += (u1[game] - mu_1) ** 2
-        denom_u2 += (u2[game] - mu_2) ** 2
+    for user in intersection:
+        num += (g1[user] - mu_1) * (g2[user] - mu_2)
+        denom_g1 += (g1[user] - mu_1) ** 2
+        denom_g2 += (g2[user] - mu_2) ** 2
 
-    denom = math.sqrt(denom_u1 * denom_u2)
+    denom = math.sqrt(denom_g1 * denom_g2)
     if denom == 0:
         return 0
     else:
         return num / denom
 
 
-def calculate_cosine(u1, u2):
+def calculate_cosine(g1, g2):
     # intersection
     intersection = []
-    for i in range(len(u1)):
-        if u1[i] != 0 and u2[i] != 0:
+    for i in range(len(g1)):
+        if g1[i] != 0 and g2[i] != 0:
             intersection.append(i)
 
     num = 0
-    denom_u1 = 0
-    denom_u2 = 0
+    denom_g1 = 0
+    denom_g2 = 0
 
-    for game in intersection:
-        num += u1[game] * u2[game]
-        denom_u1 += u1[game] ** 2
-        denom_u2 += u2[game] ** 2
+    for user in intersection:
+        num += g1[user] * g2[user]
+        denom_g1 += g1[user] ** 2
+        denom_g2 += g2[user] ** 2
 
-    denom = math.sqrt(denom_u1 * denom_u2)
+    denom = math.sqrt(denom_g1 * denom_g2)
     if denom == 0:
         return 0
     else:
@@ -161,34 +160,23 @@ def calculate_cosine(u1, u2):
 
 
 def get_top_k_game(user_game_data, similarities, k, user_inx, game_inx):
-    similarities = np.array(similarities)
-    # print(similarities)
-    data_csr = user_game_data.tocsr()
-    indices = np.array((data_csr[:, game_inx] != 0).todense().nonzero()[0])
-    actual_similarities = similarities[indices]
-    x = actual_similarities.size
-    if x >= k:
-        ind = np.argpartition(actual_similarities, -k)[-k:]
-    else:
-        ind = np.argpartition(actual_similarities, -x)[-x:]
-    return indices[ind[np.argsort(actual_similarities[ind])[::-1]]]
+    temp = np.copy(similarities)
+    temp[game_inx] = -2
+    ind = np.argpartition(temp, -k)[-k:]
+    return ind[np.argsort(temp[ind])[::-1]]
 
 
-# indices of similar users
-def predict(data, similarity, similar_users, user_inx, game_inx):
-    # find mean of prediction of this user
-    mu = mean_prediction(data, user_inx)
-
+# indices of similar games
+def predict(data, similarity, similar_games, user_inx, game_inx):
     sum = 0
-    for other_user in similar_users:
+    for other_game in similar_games:
         # compute mean of prediction of this user
-        m = mean_prediction(data, other_user)
-        sum += similarity[other_user] * (data[other_user, game_inx] - m)
+        sum += similarity[other_game] * data[user_inx, other_game]
 
     # want to predict
-    denom = np.sum(np.absolute(similarity)[similar_users])
+    denom = np.sum(np.absolute(similarity)[similar_games])
 
-    return mu + sum / denom
+    return sum / denom
 
 
 def mean_prediction(data, user_inx):

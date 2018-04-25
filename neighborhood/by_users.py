@@ -28,7 +28,7 @@ def main():
         total_rmse = [0, 0, 0, 0, 0]
         for user_inx in users:
             print('PREDICTING FOR USER ' + str(user_inx))
-            similarity = learn_row(user_inx, test_data, model)
+            similarity = learn_user(user_inx, test_data, model)
             for k in ks:
                 print('VALUE OF K: ' + str(k))
                 actual_test = []
@@ -62,7 +62,7 @@ def load_data(file_name):
     return sparse.load_npz(FILE_PATH + file_name)
 
 
-def learn_row(row_inx, A, metric):
+def learn_user(row_inx, A, metric):
     length, width = np.shape(A)
     data_1 = A[row_inx, :].A[0]
     arr = []
@@ -132,6 +132,7 @@ def calculate_cosine(u1, u2):
 
 def get_top_k_game(user_game_data, similarities, k, user_inx, game_inx):
     similarities = np.array(similarities)
+    print(similarities)
     data_csr = user_game_data.tocsr()
     indices = np.array((data_csr[:, game_inx] != 0).todense().nonzero()[0])
     actual_similarities = similarities[indices]

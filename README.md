@@ -8,14 +8,14 @@ Steam is a digital distribution platform in which users buy and play computer ga
 * Barry Plunkett
 * Stephanie Shi
 
-## Setting up the Project
-### Installing the Dependencies
-`pip install -r requirements.txt`
-
 ## File Directory
 * `neighborhood` - memory-based methods
 * `factorization` -  latent factor models
 * `boost` - boosting
 * `ensemble` - mixed methods
 
-Data is too large to include and can be obtained by contacting the owner.
+## Setting up the Project
+### Installing the Dependencies
+`pip install -r requirements.txt`
+
+Full original dataset can be found [here](https://steam.internet.byu.edu/) and is over 200GB. Processed data is too large to include and can be obtained by contacting the owner.
